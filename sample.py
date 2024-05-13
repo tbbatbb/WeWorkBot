@@ -51,6 +51,9 @@ aes_key:bytes = base64.b64decode(config['WeWork']['aes_key'])
 host:str = config['WWBot']['app_host']
 port:int = int(config['WWBot']['app_port'])
 
+# init the WWBot 
+WWBot.config(corp_id, corp_secret, token, aes_key)
+
 @WWBot.verify_handler(app, config['WWBot']['verify_path'])
 @WWBot.request_handler(app, config['WWBot']['message_path'])
 def useless(): 
