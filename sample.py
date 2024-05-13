@@ -54,7 +54,7 @@ port:int = int(config['WWBot']['app_port'])
 # init the WWBot 
 WWBot.config(corp_id, corp_secret, token, aes_key)
 
-@WWBot.verify_handler(app, config['WWBot']['verify_path'])
+@WWBot.verify_handler(app, config['WWBot']['message_path'])
 @WWBot.request_handler(app, config['WWBot']['message_path'])
 def useless(): 
     # the function is useless
