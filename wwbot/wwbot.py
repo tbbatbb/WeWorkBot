@@ -2,7 +2,7 @@
 
 import hashlib, base64, time, requests, json, random, string, struct, socket, logging, sys
 import xml.etree.cElementTree as ET
-from lib import Logger
+from .lib import Logger
 from threading import Thread
 from requests import Response
 from Crypto.Cipher import AES
