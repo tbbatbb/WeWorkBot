@@ -57,13 +57,13 @@ class WWBot:
     def aes_decrypt(cls, aes_key:bytes, enc_bytes:bytes) -> bytes:
         '''Decrypt the text that encrypted with AES'''
         enc_msg:bytes = base64.b64decode(enc_bytes)
-        aes:AES = AES.new(aes_key, AES.MODE_CBC)
+        aes:AES = AES.new(aes_key, AES.MODE_CBC, iv=aes_key[:16])
         return aes.decrypt(enc_msg)
 
     @classmethod
     def aes_encrypt(cls, aes_key:bytes, text:bytes) -> str:
         '''Encrypt the text with AES'''
-        aes:AES = AES.new(aes_key, AES.MODE_CBC)
+        aes:AES = AES.new(aes_key, AES.MODE_CBC, iv=aes_key[:16])
         text_len:int = len(text)
         block_size:int = 32
         to_pad:int = block_size - (text_len % block_size)
