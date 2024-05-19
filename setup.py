@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
   name="wwbot",
-  version="0.0.1",
+  version="0.0.2",
   author="tbbatbb",
   author_email="20682299+tbbatbb@users.noreply.github.com",
   description="A library for dealing with messages in WeWork",
