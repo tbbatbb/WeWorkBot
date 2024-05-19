@@ -1,17 +1,12 @@
 
 import setuptools
 
-with open("readme.md", "r") as fh:
-  long_description = fh.read()
-
 setuptools.setup(
   name="wwbot",
   version="0.0.1",
   author="tbbatbb",
   author_email="20682299+tbbatbb@users.noreply.github.com",
   description="A library for dealing with messages in WeWork",
-  long_description=long_description,
-  long_description_content_type="text/markdown",
   url="https://github.com/tbbatbb/WeWorkBot",
   packages=setuptools.find_packages(),
   classifiers=[
