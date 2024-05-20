@@ -7,8 +7,9 @@ from threading import Thread
 from requests import Response
 from Crypto.Cipher import AES
 from flask import Flask, request
+from .msg import Message, msg_from_xml, TextMessage, ImageMessage, VoiceMessage, VideoMessage, LinkMessage, LocationMessage
 from xml.etree.cElementTree import Element
-from typing import List, Tuple, Callable, Literal, Dict, Any
+from typing import List, Tuple, Callable, Literal, Dict, Union
 
 log = logging.getLogger('werkzeug')
 log.disabled = True
@@ -29,8 +30,8 @@ class WWBot:
 
     max_retry:int = 3
 
-    msg_handler:Dict[str, Callable] = {}
-    resp_msg_cache:Dict[str, Dict[Literal['nreq', 'resp', 'msg_xml'], Any]] = {}
+    msg_handler:Dict[str, Callable[[Message], Message]] = {}
+    resp_msg_cache:Dict[str, Dict[Literal['nreq', 'resp', 'msg'], Union[int, Message]]] = {}
 
     # configurations 
     corp_id:str = ''
@@ -158,37 +159,31 @@ class WWBot:
         return '{}'
 
     @classmethod
-    def on(cls, msg_type:Literal['text', 'image', 'voice', 'video', 'location', 'link'], must_reply:bool=True) -> Callable:
+    def on(cls, msg_type:Literal['text', 'image', 'voice', 'video', 'location', 'link'], must_reply:bool=True) -> Callable[[Callable[[Message], Message]], Callable[[Message], Message]]:
         '''Decorator for message dealing'''
-        def deco(func:Callable):
-            def on_wrapper(*args, **kwargs):
-                msg_xml:Element = args[2]
-                to_user:str = msg_xml.find('ToUserName').text
-                from_user:str = msg_xml.find('FromUserName').text
-                msg_id:str = msg_xml.find('MsgId').text
-                if msg_id in cls.resp_msg_cache and cls.resp_msg_cache[msg_id]['resp'] is not None:
-                    resp:str = cls.resp_msg_cache[msg_id]['resp']
-                    del cls.resp_msg_cache[msg_id]
-                    return resp
-                if msg_id in cls.resp_msg_cache: return None
+        def deco(func:Callable[[Message], Message]) -> Callable[[Message], Message]:
+            def on_wrapper(msg:Message) -> Message:
+                if msg.message_id in cls.resp_msg_cache and cls.resp_msg_cache[msg.message_id]['resp'] is not None:
+                    resp_msg:Message = cls.resp_msg_cache[msg.message_id]['resp']
+                    del cls.resp_msg_cache[msg.message_id]
+                    return resp_msg
+                if msg.message_id in cls.resp_msg_cache: return None
 
-                def thread_job(corp_id:str, corp_secret:str, msg_xml:Element):
-                    resp:str = func(from_user, to_user, msg_xml)
-                    cls.resp_msg_cache[msg_id]['resp'] = resp
-                    if cls.resp_msg_cache[msg_id]['nreq'] >= cls.max_retry:
+                def thread_job(msg:Message):
+                    resp_msg:Message = func(msg)
+                    cls.resp_msg_cache[msg.message_id]['resp'] = resp_msg
+                    if cls.resp_msg_cache[msg.message_id]['nreq'] >= cls.max_retry:
                         if must_reply:
-                            user_id:str = msg_xml.find('FromUserName').text
-                            agent_id:str = msg_xml.find('AgentID').text
-                            cls.logger.info(f'Reply to the message No. {msg_id} of {user_id} asynchronously')
-                            cls.send_to(corp_id, corp_secret, cls.trans_xml_to_json(agent_id, ET.fromstring(resp)))
-                        del cls.resp_msg_cache[msg_id]
+                            cls.logger.info(f'Reply to the message No. {msg.message_id} of {msg.from_username} asynchronously')
+                            cls.send_to(cls.corp_id, cls.corp_secret, resp_msg)
+                        del cls.resp_msg_cache[msg.message_id]
 
-                cls.resp_msg_cache[msg_id] = {
+                cls.resp_msg_cache[msg.message_id] = {
                     'nreq': 0,
                     'resp': None,
-                    'msg_xml': msg_xml
+                    'msg': msg
                 }
-                thread:Thread = Thread(target=thread_job, args=args, kwargs=kwargs)
+                thread:Thread = Thread(target=thread_job, args=(msg,))
                 thread.start()
             cls.msg_handler[msg_type] = on_wrapper
             return on_wrapper
@@ -245,21 +240,23 @@ class WWBot:
                 
                 dec_msg:bytes = cls.aes_decrypt(cls.aes_key, enc_msg)
                 msg_len:int = int.from_bytes(dec_msg[16:20], 'big')
-                msg:str = dec_msg[20:20+msg_len].decode('utf-8')
+                msg_xml_str:str = dec_msg[20:20+msg_len].decode('utf-8')
 
-                msg_detail_xml:Element = ET.fromstring(msg)
-                msg_type:str = msg_detail_xml.find('MsgType').text
-                msg_id:str = msg_detail_xml.find('MsgId').text
+                msg_detail_xml:Element = ET.fromstring(msg_xml_str)
+                # parse message for detail 
+                msg:Message = msg_from_xml(msg_detail_xml)
 
-                cls.logger.info(f'Got a new {msg_type} message, NO. {msg_id}')
+                if msg is None: return '', 200
+
+                cls.logger.info(f'Got a new {msg.__class__.__name__} message, NO. {msg.message_id}')
 
                 start_at:float = time.time()
-                resp_xml:str = cls.msg_handler[msg_type](cls.corp_id, cls.corp_secret, msg_detail_xml)
-                while (time.time() - start_at < 4.8) and resp_xml is None:
+                resp_msg:Message = cls.msg_handler[msg.type](msg)
+                while (time.time() - start_at < 4.8) and resp_msg is None:
                     time.sleep(0.4)
-                    resp_xml = cls.msg_handler[msg_type](cls.corp_id, cls.corp_secret, msg_detail_xml)
-                if resp_xml is None:
-                    cls.resp_msg_cache[msg_id]['nreq'] += 1
+                    resp_msg = cls.msg_handler[msg.type](msg)
+                if resp_msg is None:
+                    cls.resp_msg_cache[msg.message_id]['nreq'] += 1
                     cls.logger.warn('Failed to reply in time, try next time')
                     time.sleep(0.2)
                     return '', 403
@@ -270,6 +267,7 @@ class WWBot:
                 resp_rdm_str:str = ''.join(random.choices(string.ascii_letters, k=16))
                 resp_recv_id:str = ''.join(random.choices(string.digits, k=16)).encode('utf-8')
                 
+                resp_xml:str = msg.to_xml()
                 resp_msg_encrypt:str = cls.aes_encrypt(cls.aes_key, resp_rdm_str.encode('utf-8') + struct.pack('I', socket.htonl(len(resp_xml.encode('utf-8')))) + resp_xml.encode('utf-8') + resp_recv_id)
                 resp_msg_sig:str = cls.cal_sig(cls.token, resp_ts, resp_nonce, resp_msg_encrypt)
 
@@ -278,42 +276,25 @@ class WWBot:
         return deco
 
 @WWBot.on('text')
-def text_default(from_user:str, to_user:str, msg_xml:Element) -> str:
-    msg_content:str = msg_xml.find('Content').text
-    return WWBot.format_text_msg(from_user, to_user, msg_content)
+def text_default(msg:TextMessage) -> Message:
+    return TextMessage(msg.from_username, msg.to_username, msg.content)
 
 @WWBot.on('image')
-def image_default(from_user:str, to_user:str, msg_xml:Element) -> str:
-    pic_url:str = msg_xml.find('PicUrl').text
-    media_id:str = msg_xml.find('MediaId').text
-    return WWBot.format_image_msg(from_user, to_user, media_id)
+def image_default(msg:ImageMessage) -> Message:
+    return ImageMessage(msg.from_username, msg.to_username, msg.media_id)
 
 @WWBot.on('voice')
-def voice_defualt(from_user:str, to_user:str, msg_xml:Element) -> str:
-    media_id:str = msg_xml.find('MediaId').text
-    return WWBot.format_voice_msg(from_user, to_user, media_id)
+def voice_defualt(msg:VoiceMessage) -> Message:
+    return VoiceMessage(msg.from_username, msg.to_username, msg.media_id)
 
 @WWBot.on('video')
-def video_default(from_user:str, to_user:str, msg_xml:Element) -> str:
-    media_id:str = msg_xml.find('MediaId').text
-    title:str = msg_xml.find('Title').text
-    desc:str = msg_xml.find('Description').text
-    return WWBot.format_video_msg(from_user, to_user, media_id, title, desc)
+def video_default(msg:VideoMessage) -> Message:
+    return VideoMessage(msg.from_username, msg.to_username, msg.media_id)
 
 @WWBot.on('location')
-def location_default(from_user:str, to_user:str, msg_xml:Element) -> str:
-    loc_x:str = msg_xml.find('Location_X').text
-    loc_y:str = msg_xml.find('Location_Y').text
-    scale:str = msg_xml.find('Scale').text
-    label:str = msg_xml.find('Label').text
-    msg:str = f'{label}:({loc_x},{loc_y})\nScale:{scale}'
-    return WWBot.format_text_msg(from_user, to_user, msg)
+def location_default(msg:LocationMessage) -> Message:
+    return TextMessage(msg.from_username, msg.to_username, f'{msg.label}:({msg.location_x},{msg.location_y})\nScale:{msg.scale}')
 
 @WWBot.on('link')
-def link_default(from_user:str, to_user:str, msg_xml:Element) -> str:
-    title:str = msg_xml.find('Title').text
-    desc:str = msg_xml.find('Description').text
-    url:str = msg_xml.find('Url').text
-    pic_url:str = msg_xml.find('PicUrl').text
-    msg:str = f'[《{title}》:{desc}]({url})\nPic: {pic_url}'
-    return WWBot.format_text_msg(from_user, to_user, msg)
+def link_default(msg:LinkMessage) -> Message:
+    return TextMessage(msg.from_username, msg.to_username, f'{msg.title}\n{msg.description}\n{msg.url}\n{msg.pic_url}')
