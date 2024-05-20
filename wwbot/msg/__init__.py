@@ -37,10 +37,18 @@ class Message:
 
 
 from .text_msg import TextMessage
+from .link_msg import LinkMessage
 from .image_msg import ImageMessage
+from .voice_msg import VoiceMessage
+from .video_msg import VideoMessage
+from .location_msg import LocationMessage
 
 def msg_from_xml(xml_tree:Element) -> Message:
     '''Parse message from xml tree'''
     msg_type:str = xml_tree.find('MsgType').text
     if msg_type == 'text': return TextMessage.from_xml(xml_tree)
     if msg_type == 'image': return ImageMessage.from_xml(xml_tree)
+    if msg_type == 'voice': return VoiceMessage.from_xml(xml_tree)
+    if msg_type == 'video': return VideoMessage.from_xml(xml_tree)
+    if msg_type == 'link': return LinkMessage.from_xml(xml_tree)
+    if msg_type == 'location': return LocationMessage.from_xml(xml_tree)
