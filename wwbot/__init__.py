@@ -40,11 +40,18 @@ class WWBot:
     aes_key:bytes = b''
 
     @classmethod
-    def config(cls, corp_id:str, corp_secret:str, token:str, aes_key:bytes):
+    def config(cls, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot'):
+        '''Configure the basic arguments for the bot'''
+        # corp id (in the page of corp. detail)
         cls.corp_id = corp_id
+        # corp secret (maybe in the page of corp. detail too)
         cls.corp_secret = corp_secret
+        # random token set in the page of application detail 
         cls.token = token
+        # the key for AES encryption, set in the page of application detail 
         cls.aes_key = aes_key
+        # the url path for the message callback 
+        cls.callback_path:str = callback_path
 
     @classmethod
     def cal_sig(cls, token:str, timestamp:str, nonce:str, enc_text:str) -> str:
@@ -116,49 +123,6 @@ class WWBot:
             return False
 
     @classmethod
-    def format_text_msg(cls, to_id:str, from_id:str, content:str) -> str:
-        timestamp:str = str(int(time.time()))
-        return f'''<xml><ToUserName><![CDATA[{to_id}]]></ToUserName><FromUserName><![CDATA[{from_id}]]></FromUserName> <CreateTime>{timestamp}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'''
-
-    @classmethod
-    def format_image_msg(cls, to_id:str, from_id:str, media_id:str) -> str:
-        timestamp:str = str(int(time.time()))
-        return f'''<xml><ToUserName><![CDATA[{to_id}]]></ToUserName><FromUserName><![CDATA[{from_id}]]></FromUserName><CreateTime>{timestamp}</CreateTime><MsgType><![CDATA[image]]></MsgType><Image><MediaId><![CDATA[{media_id}]]></MediaId></Image></xml>'''
-
-    @classmethod
-    def format_voice_msg(cls, to_id:str, from_id:str, media_id:str) -> str:
-        timestamp:str = str(int(time.time()))
-        return f'''<xml><ToUserName><![CDATA[{to_id}]]></ToUserName><FromUserName><![CDATA[{from_id}]]></FromUserName><CreateTime>{timestamp}</CreateTime><MsgType><![CDATA[voice]]></MsgType><Voice><MediaId><![CDATA[{media_id}]]></MediaId></Voice></xml>'''
-
-    @classmethod
-    def format_video_msg(cls, to_id:str, from_id:str, media_id:str, title:str, desc:str) -> str:
-        timestamp:str = str(int(time.time()))
-        return f'''<xml><ToUserName><![CDATA[{to_id}]]></ToUserName><FromUserName><![CDATA[{from_id}]]></FromUserName><CreateTime>{timestamp}</CreateTime><MsgType><![CDATA[video]]></MsgType><Video><MediaId><![CDATA[{media_id}]]></MediaId><Title><![CDATA[{title}]]></Title><Description><![CDATA[{desc}]]></Description></Video></xml>'''
-
-    @classmethod
-    def format_news_msg(cls, to_id:str, from_id:str, news:List[Dict[Literal['title', 'desc', 'pic_url', 'url'], str]]) -> str:
-        timestamp:str = str(int(time.time()))
-        news_str:str = ''.join(map(lambda n: f'''<item><Title><![CDATA[{n["title"] if "title" in n else ""}]]></Title> <Description><![CDATA[{n["desc"] if "desc" in n else ""}]]></Description><PicUrl><![CDATA[{n["pic_url"] if "pic_url" in n else ""}]]></PicUrl><Url><![CDATA[{n["url"] if "url" in n else ""}]]></Url></item>''', news))
-        return f'''<xml><ToUserName><![CDATA[{to_id}]]></ToUserName><FromUserName><![CDATA[{from_id}]]></FromUserName><CreateTime>{timestamp}</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>{len(news)}</ArticleCount><Articles>{news_str}</Articles></xml>'''
-
-    @classmethod
-    def trans_xml_to_json(cls, agent_id:str, msg_xml:Element) -> str:
-        msg_type:str = msg_xml.find('MsgType').text
-        to_id:str = msg_xml.find('ToUserName').text
-        if msg_type == 'text': 
-            content:str = msg_xml.find('Content').text
-            return json.dumps({"touser":f"{to_id}","msgtype":"text","agentid":f"{agent_id}","text":{"content":f"{content}"}})
-        if msg_type in ['image', 'voice']:
-            media_id:str = msg_xml.find('MediaId').text
-            return json.dumps({"touser":f"{to_id}","msgtype":"image","agentid":f"{agent_id}","image":{"media_id":f"{media_id}"}})
-        if msg_type == 'video':
-            media_id:str = msg_xml.find('MediaId').text
-            title:str = msg_xml.find('Title').text
-            desc:str = msg_xml.find('Description').text
-            return json.dumps({"touser":f"{to_id}","msgtype":"video","agentid":f"{agent_id}","image":{"media_id":f"{media_id}","title":f"{title}","description":f"{desc}"}})
-        return '{}'
-
-    @classmethod
     def on(cls, msg_type:Literal['text', 'image', 'voice', 'video', 'location', 'link'], must_reply:bool=True) -> Callable[[Callable[[Message], Message]], Callable[[Message], Message]]:
         '''Decorator for message dealing'''
         def deco(func:Callable[[Message], Message]) -> Callable[[Message], Message]:
@@ -190,10 +154,10 @@ class WWBot:
         return deco
     
     @classmethod
-    def verify_handler(cls, app:Flask, path:str, methods:List[str]=['GET']):
+    def verify_handler(cls, app:Flask, methods:List[str]=['GET']):
         '''Decorator for url verification callback'''
         def deco(func:Callable):
-            @app.route(path, methods=methods)
+            @app.route(cls.callback_path, methods=methods)
             def verify_handler_wrapper(*args, **kwargs):
                 msg_sig:str = request.args.get('msg_signature', default='')
                 ts:str = request.args.get('timestamp', default='')
@@ -217,10 +181,10 @@ class WWBot:
         return deco
 
     @classmethod
-    def request_handler(cls, app:Flask, path:str, methods:List[str]=['POST']):
+    def request_handler(cls, app:Flask, methods:List[str]=['POST']):
         '''Decorator for request callback'''
         def deco(func:Callable):
-            @app.route(path, methods=methods)
+            @app.route(cls.callback_path, methods=methods)
             def request_handler_wrapper(*args, **kwargs):
                 msg_sig:str = request.args.get('msg_signature', default='')
                 ts:str = request.args.get('timestamp', default='')
