@@ -101,7 +101,7 @@ class WWBot:
             return None
 
     @classmethod
-    def send_to(cls, corp_id:str, corp_secret:str, json_data:str):
+    def send_to(cls, corp_id:str, corp_secret:str, msg:Message):
         '''Send a text message to a specific user'''
         access_token:str = cls.get_access_token(corp_id, corp_secret)
         if access_token is None:
@@ -109,7 +109,7 @@ class WWBot:
             return False
         url:str = cls.API_PUSH_URL.format(token=access_token)
         try:
-            resp:Response = requests.post(url, data=json_data, timeout=20)
+            resp:Response = requests.post(url, data=msg.to_json(), timeout=20)
             if resp.status_code != 200:
                 cls.logger.error('WxWork Receive Response With Status Code', resp.status_code)
                 return False
