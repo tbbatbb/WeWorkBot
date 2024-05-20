@@ -16,6 +16,9 @@ class News(NamedTuple):
 
 class NewsMessage(Message):
 
+    # message type 
+    type:str = 'news'
+
     def __init__(self, to_username: str, from_username: str, articles:List[News], **kwargs) -> None:
         super().__init__(to_username, from_username, **kwargs)
         # the news list 

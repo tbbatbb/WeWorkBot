@@ -6,6 +6,9 @@ from xml.etree.ElementTree import Element
 
 class TextMessage(Message):
 
+    # message type 
+    type:str = 'text'
+
     def __init__(self, to_username: str, from_username: str, content: str, **kwargs) -> None:
         super().__init__(to_username, from_username, **kwargs)
         # the content of the message 

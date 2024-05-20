@@ -5,6 +5,9 @@ from xml.etree.ElementTree import Element
 
 class LinkMessage(Message):
 
+    # message type 
+    type:str = 'link'
+
     def __init__(self, to_username: str, from_username: str, title:str, desc:str, url:str, pic_url:str, **kwargs) -> None:
         super().__init__(to_username, from_username, **kwargs)
         # the title of the link

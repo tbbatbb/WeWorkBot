@@ -6,6 +6,9 @@ from xml.etree.ElementTree import Element
 
 class MarkdownMessage(Message):
 
+    # message type 
+    type:str = 'markdown'
+
     def __init__(self, to_username: str, from_username: str, content: str, **kwargs) -> None:
         super().__init__(to_username, from_username, **kwargs)
         # the content in markdown format

@@ -5,6 +5,9 @@ from xml.etree.ElementTree import Element
 
 class LocationMessage(Message):
 
+    # message type 
+    type:str = 'location'
+
     def __init__(self, to_username: str, from_username: str, loc_x:str, loc_y:str, scale:str, label:str, **kwargs) -> None:
         super().__init__(to_username, from_username, **kwargs)
         # the latitude value for the location

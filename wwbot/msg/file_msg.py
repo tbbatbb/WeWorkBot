@@ -6,6 +6,9 @@ from xml.etree.ElementTree import Element
 
 class FileMessage(Message):
 
+    # message type 
+    type:str = 'file'
+
     def __init__(self, to_username: str, from_username: str, media_id: str, **kwargs) -> None:
         super().__init__(to_username, from_username, **kwargs)
         # media id for the file 
