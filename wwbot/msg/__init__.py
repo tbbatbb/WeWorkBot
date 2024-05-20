@@ -38,10 +38,15 @@ class Message:
 
 from .text_msg import TextMessage
 from .link_msg import LinkMessage
+from .file_msg import FileMessage
 from .image_msg import ImageMessage
 from .voice_msg import VoiceMessage
 from .video_msg import VideoMessage
+from .news_msg import News, NewsMessage
 from .location_msg import LocationMessage
+from .markdown_msg import MarkdownMessage
+from .textcard_msg import TextCardMessage
+from .mpnews_msg import MPNews, MPNewsMessage
 
 def msg_from_xml(xml_tree:Element) -> Message:
     '''Parse message from xml tree'''

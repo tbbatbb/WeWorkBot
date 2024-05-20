@@ -1,0 +1,43 @@
+#!python3.9
+
+import json
+from . import Message
+from xml.etree.ElementTree import Element
+from typing import Any, Dict, List, NamedTuple
+
+class MPNews(NamedTuple):
+    '''A piece of single mpnews'''
+    title:str
+    thumb_media_id:str
+    content:str
+    author:str = None
+    content_source_url:str = None
+    desc:str = None
+
+class MPNewsMessage(Message):
+
+    def __init__(self, to_username: str, from_username: str, articles:List[MPNews], **kwargs) -> None:
+        super().__init__(to_username, from_username, **kwargs)
+        # the mpnews list 
+        self.articles:List[MPNews] = articles
+
+    def to_xml(self) -> str:
+        '''Represent mpnews message in XML format'''
+        raise NotImplementedError('Unable to reply with a mpnews message in current WeWork')
+
+    def to_json(self) -> str:
+        '''Represent mpnews message in JSON format'''
+        articles:List[Dict[str, str]] = []
+        for n in self.articles:
+            article:Dict[str, str] = {"title":n.title,"thumb_media_id":n.thumb_media_id,"content":n.content}
+            if n.author is not None: article["author"] = n.author
+            if n.content_source_url is not None: article["content_source_url"] = n.content_source_url
+            if n.desc is not None: article["digest"] = n.desc
+            articles.append(article)
+        return json.dumps({"touser":self.to_username,"msgtype":"mpnews","agentid":self.agent_id,"mpnews":{"articles":articles}})
+    
+    @classmethod
+    def from_xml(cls, xml_tree: Element):
+        '''Parse mpnews message from XML object'''
+        raise NotImplementedError('Unable to receive and parse a mpnews message in current WeWork')
+
