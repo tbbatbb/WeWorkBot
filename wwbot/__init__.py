@@ -231,7 +231,7 @@ class WWBot:
                 resp_rdm_str:str = ''.join(random.choices(string.ascii_letters, k=16))
                 resp_recv_id:str = ''.join(random.choices(string.digits, k=16)).encode('utf-8')
                 
-                resp_xml:str = msg.to_xml()
+                resp_xml:str = resp_msg.to_xml()
                 resp_msg_encrypt:str = cls.aes_encrypt(cls.aes_key, resp_rdm_str.encode('utf-8') + struct.pack('I', socket.htonl(len(resp_xml.encode('utf-8')))) + resp_xml.encode('utf-8') + resp_recv_id)
                 resp_msg_sig:str = cls.cal_sig(cls.token, resp_ts, resp_nonce, resp_msg_encrypt)
 
