@@ -48,9 +48,9 @@ class Logger(object):
             call_stack:str = f'[{caller}:{line}]'
         print(color + symbol, ts, f'[{self.name}]', call_stack + Logger.C_DEFAULT, *args, **kwarg)
         sys.stdout.flush()
-        msg = ' '.join([str(a) for a in args])
-        self.__save(self.TOTAL_LOG_NAME, f'[{ts}] | {msg}{os.linesep}')
         if self.save_to_file:
+            msg = ' '.join([str(a) for a in args])
+            self.__save(self.TOTAL_LOG_NAME, f'[{ts}] | {msg}{os.linesep}')
             self.__save(self.name, f'{symbol}[{ts}] | {msg}{os.linesep}')
 
     def __save(self, file_name:str, msg:str):
