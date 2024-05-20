@@ -1,10 +1,13 @@
 # -*- encoding: utf-8
 
 import time, random
+from ..lib import Logger
 from abc import abstractmethod
 from xml.etree.cElementTree import Element
 
 class Message:
+
+    logger:Logger = Logger('Message')
 
     def __init__(self, to_username:str, from_username:str, agent_id:str='', create_time:int=None, msg_id:int=None) -> None:
         # the id of the receiver of the message 
@@ -57,3 +60,4 @@ def msg_from_xml(xml_tree:Element) -> Message:
     if msg_type == 'video': return VideoMessage.from_xml(xml_tree)
     if msg_type == 'link': return LinkMessage.from_xml(xml_tree)
     if msg_type == 'location': return LocationMessage.from_xml(xml_tree)
+    Message.logger.warn('Unregistered message type')
