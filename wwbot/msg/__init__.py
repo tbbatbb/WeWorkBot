@@ -35,8 +35,8 @@ class Message:
         '''Represent the message in JSON format'''
         pass
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def from_xml(cls, xml_tree:Element):
         '''Parse different types of messages from XML object'''
         pass 
