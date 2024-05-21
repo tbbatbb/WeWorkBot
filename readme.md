@@ -15,7 +15,7 @@
 
 ## 依赖
 
-依赖的库不多，可以参考`requirements.txt`。其中`requests`并非`wwbot`本身的依赖，而是`sample.py`示例中的依赖。
+依赖的库不多，可以参考`requirements.txt`。
 
 ## 安装
 
@@ -57,14 +57,7 @@ aes_key:bytes = base64.b64decode('aes_key')
 callback_path:str = '/wwbot'
 
 # 配置机器人
-WWBot.config(corp_id, corp_secret, token, aes_key, callback_path=callback_path)
-
-# 下面这一撮代码 有点儿丑 迟早要想办法删掉 力求优雅
-@WWBot.verify_handler(app)
-@WWBot.request_handler(app)
-def useless(): 
-    # 该函数在当前版本中并不会被调用，所以随意定义
-    pass
+WWBot.config(app, corp_id, corp_secret, token, aes_key, callback_path=callback_path)
 
 if __name__ == '__main__':
     app.run('0.0.0.0', 31221)
