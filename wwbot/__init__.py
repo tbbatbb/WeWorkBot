@@ -139,6 +139,8 @@ class WWBot:
 
                 def thread_job(msg:Message):
                     resp_msg:Message = func(msg)
+                    # set the agent id for the message 
+                    resp_msg.agent_id = msg.agent_id
                     cls.__resp_msg_cache[msg.message_id]['resp'] = resp_msg
                     if cls.__resp_msg_cache[msg.message_id]['nreq'] >= cls.max_retry:
                         if must_reply:
