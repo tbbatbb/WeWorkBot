@@ -31,7 +31,7 @@ class WWBot:
     max_retry:int = 3
 
     msg_handler:Dict[str, Callable[[Message], Message]] = {}
-    resp_msg_cache:Dict[str, Dict[Literal['nreq', 'resp', 'msg'], Union[int, Message]]] = {}
+    __resp_msg_cache:Dict[str, Dict[Literal['nreq', 'resp'], Union[int, Message]]] = {}
 
     # configurations 
     corp_id:str = ''
@@ -127,26 +127,22 @@ class WWBot:
         '''Decorator for message dealing'''
         def deco(func:Callable[[Message], Message]) -> Callable[[Message], Message]:
             def on_wrapper(msg:Message) -> Message:
-                if msg.message_id in cls.resp_msg_cache and cls.resp_msg_cache[msg.message_id]['resp'] is not None:
-                    resp_msg:Message = cls.resp_msg_cache[msg.message_id]['resp']
-                    del cls.resp_msg_cache[msg.message_id]
+                if msg.message_id in cls.__resp_msg_cache and cls.__resp_msg_cache[msg.message_id]['resp'] is not None:
+                    resp_msg:Message = cls.__resp_msg_cache[msg.message_id]['resp']
+                    del cls.__resp_msg_cache[msg.message_id]
                     return resp_msg
-                if msg.message_id in cls.resp_msg_cache: return None
+                if msg.message_id in cls.__resp_msg_cache: return None
 
                 def thread_job(msg:Message):
                     resp_msg:Message = func(msg)
-                    cls.resp_msg_cache[msg.message_id]['resp'] = resp_msg
-                    if cls.resp_msg_cache[msg.message_id]['nreq'] >= cls.max_retry:
+                    cls.__resp_msg_cache[msg.message_id]['resp'] = resp_msg
+                    if cls.__resp_msg_cache[msg.message_id]['nreq'] >= cls.max_retry:
                         if must_reply:
                             cls.logger.info(f'Reply to the message No. {msg.message_id} of {msg.from_username} asynchronously')
                             cls.send_to(cls.corp_id, cls.corp_secret, resp_msg)
-                        del cls.resp_msg_cache[msg.message_id]
+                        del cls.__resp_msg_cache[msg.message_id]
 
-                cls.resp_msg_cache[msg.message_id] = {
-                    'nreq': 0,
-                    'resp': None,
-                    'msg': msg
-                }
+                cls.__resp_msg_cache[msg.message_id] = {'nreq': 0, 'resp': None}
                 thread:Thread = Thread(target=thread_job, args=(msg,))
                 thread.start()
             cls.msg_handler[msg_type] = on_wrapper
@@ -220,7 +216,7 @@ class WWBot:
                     time.sleep(0.4)
                     resp_msg = cls.msg_handler[msg.type](msg)
                 if resp_msg is None:
-                    cls.resp_msg_cache[msg.message_id]['nreq'] += 1
+                    cls.__resp_msg_cache[msg.message_id]['nreq'] += 1
                     cls.logger.warn('Failed to reply in time, try next time')
                     time.sleep(0.2)
                     return '', 403
