@@ -38,10 +38,14 @@ class WWBot:
     corp_secret:str = ''
     token:str = ''
     aes_key:bytes = b''
+    callback_path:str = '/mbot'
+    flask_app:Flask = None
 
     @classmethod
-    def config(cls, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot'):
+    def config(cls, app:Flask, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot'):
         '''Configure the basic arguments for the bot'''
+        # flask app 
+        cls.flask_app = app
         # corp id (in the page of corp. detail)
         cls.corp_id = corp_id
         # corp secret (maybe in the page of corp. detail too)
@@ -51,7 +55,7 @@ class WWBot:
         # the key for AES encryption, set in the page of application detail 
         cls.aes_key = aes_key
         # the url path for the message callback 
-        cls.callback_path:str = callback_path
+        cls.callback_path = callback_path
 
     @classmethod
     def cal_sig(cls, token:str, timestamp:str, nonce:str, enc_text:str) -> str:
@@ -150,10 +154,10 @@ class WWBot:
         return deco
     
     @classmethod
-    def verify_handler(cls, app:Flask, methods:List[str]=['GET']):
+    def verify_handler(cls, methods:List[str]=['GET']):
         '''Decorator for url verification callback'''
         def deco(func:Callable):
-            @app.route(cls.callback_path, methods=methods)
+            @cls.flask_app.route(cls.callback_path, methods=methods)
             def verify_handler_wrapper(*args, **kwargs):
                 msg_sig:str = request.args.get('msg_signature', default='')
                 ts:str = request.args.get('timestamp', default='')
@@ -177,10 +181,10 @@ class WWBot:
         return deco
 
     @classmethod
-    def request_handler(cls, app:Flask, methods:List[str]=['POST']):
+    def request_handler(cls, methods:List[str]=['POST']):
         '''Decorator for request callback'''
         def deco(func:Callable):
-            @app.route(cls.callback_path, methods=methods)
+            @cls.flask_app.route(cls.callback_path, methods=methods)
             def request_handler_wrapper(*args, **kwargs):
                 msg_sig:str = request.args.get('msg_signature', default='')
                 ts:str = request.args.get('timestamp', default='')
