@@ -59,6 +59,7 @@ callback_path:str = '/wwbot'
 # 配置机器人
 WWBot.config(corp_id, corp_secret, token, aes_key, callback_path=callback_path)
 
+# 下面这一撮代码 有点儿丑 迟早要想办法删掉 力求优雅
 @WWBot.verify_handler(app)
 @WWBot.request_handler(app)
 def useless(): 
