@@ -9,8 +9,8 @@ class TextCardMessage(Message):
     # message type 
     type:str = 'textcard'
 
-    def __init__(self, to_username: str, from_username: str, title: str, desc:str, url:str, btntext:str='', **kwargs) -> None:
-        super().__init__(to_username, from_username, **kwargs)
+    def __init__(self, to_username: str, from_username: str, agent_id: str, title: str, desc:str, url:str, btntext:str='', **kwargs) -> None:
+        super().__init__(to_username, from_username, agent_id, **kwargs)
         # the title for the card
         self.title:str = title
         # the description for the card 

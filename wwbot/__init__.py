@@ -139,8 +139,6 @@ class WWBot:
 
                 def thread_job(msg:Message):
                     resp_msg:Message = func(msg)
-                    # set the agent id for the message 
-                    resp_msg.agent_id = msg.agent_id
                     cls.__resp_msg_cache[msg.message_id]['resp'] = resp_msg
                     if cls.__resp_msg_cache[msg.message_id]['nreq'] >= cls.max_retry:
                         if must_reply:
@@ -243,24 +241,24 @@ class WWBot:
 
 @WWBot.on('text')
 def text_default(msg:TextMessage) -> Message:
-    return TextMessage(msg.from_username, msg.to_username, msg.content)
+    return TextMessage(msg.from_username, msg.to_username, msg.agent_id, msg.content)
 
 @WWBot.on('image')
 def image_default(msg:ImageMessage) -> Message:
-    return ImageMessage(msg.from_username, msg.to_username, msg.media_id)
+    return ImageMessage(msg.from_username, msg.to_username, msg.agent_id, msg.media_id)
 
 @WWBot.on('voice')
 def voice_defualt(msg:VoiceMessage) -> Message:
-    return VoiceMessage(msg.from_username, msg.to_username, msg.media_id)
+    return VoiceMessage(msg.from_username, msg.to_username, msg.agent_id, msg.media_id)
 
 @WWBot.on('video')
 def video_default(msg:VideoMessage) -> Message:
-    return VideoMessage(msg.from_username, msg.to_username, msg.media_id)
+    return VideoMessage(msg.from_username, msg.to_username, msg.agent_id, msg.media_id)
 
 @WWBot.on('location')
 def location_default(msg:LocationMessage) -> Message:
-    return TextMessage(msg.from_username, msg.to_username, f'{msg.label}:({msg.location_x},{msg.location_y})\nScale:{msg.scale}')
+    return TextMessage(msg.from_username, msg.to_username, msg.agent_id, f'{msg.label}:({msg.location_x},{msg.location_y})\nScale:{msg.scale}')
 
 @WWBot.on('link')
 def link_default(msg:LinkMessage) -> Message:
-    return TextMessage(msg.from_username, msg.to_username, f'{msg.title}\n{msg.description}\n{msg.url}\n{msg.pic_url}')
+    return TextMessage(msg.from_username, msg.to_username, msg.agent_id, f'{msg.title}\n{msg.description}\n{msg.url}\n{msg.pic_url}')

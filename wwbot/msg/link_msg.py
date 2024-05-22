@@ -8,8 +8,8 @@ class LinkMessage(Message):
     # message type 
     type:str = 'link'
 
-    def __init__(self, to_username: str, from_username: str, title:str, desc:str, url:str, pic_url:str, **kwargs) -> None:
-        super().__init__(to_username, from_username, **kwargs)
+    def __init__(self, to_username: str, from_username: str, agent_id: str, title:str, desc:str, url:str, pic_url:str, **kwargs) -> None:
+        super().__init__(to_username, from_username, agent_id, **kwargs)
         # the title of the link
         self.title:str = title
         # the description of the link 

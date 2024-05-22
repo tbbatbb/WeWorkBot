@@ -9,8 +9,8 @@ class VideoMessage(Message):
     # message type 
     type:str = 'video'
 
-    def __init__(self, to_username: str, from_username: str, media_id: str, thumb_id:str = '', title:str = '', desc:str = '', **kwargs) -> None:
-        super().__init__(to_username, from_username, **kwargs)
+    def __init__(self, to_username: str, from_username: str, agent_id: str, media_id: str, thumb_id:str = '', title:str = '', desc:str = '', **kwargs) -> None:
+        super().__init__(to_username, from_username, agent_id, **kwargs)
         # media id for the video 
         self.media_id:str = media_id
         # the id for the thumb image

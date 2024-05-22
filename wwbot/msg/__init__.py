@@ -12,7 +12,7 @@ class Message:
     # message type 
     type:str = 'message'
 
-    def __init__(self, to_username:str, from_username:str, agent_id:str='', create_time:int=None, msg_id:int=None) -> None:
+    def __init__(self, to_username:str, from_username:str, agent_id:str, create_time:int=None, msg_id:int=None) -> None:
         # the id of the receiver of the message 
         self.to_username:str = to_username
         # the id of the sender of the message 

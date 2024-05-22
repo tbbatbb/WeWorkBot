@@ -9,8 +9,8 @@ class VoiceMessage(Message):
     # message type 
     type:str = 'voice'
 
-    def __init__(self, to_username: str, from_username: str, media_id: str, format:str = 'amr', **kwargs) -> None:
-        super().__init__(to_username, from_username, **kwargs)
+    def __init__(self, to_username: str, from_username: str, agent_id: str, media_id: str, format:str = 'amr', **kwargs) -> None:
+        super().__init__(to_username, from_username, agent_id, **kwargs)
         # media id for the voice 
         self.media_id:str = media_id
         # the format of the voice file 

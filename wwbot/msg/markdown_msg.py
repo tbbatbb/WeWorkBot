@@ -9,8 +9,8 @@ class MarkdownMessage(Message):
     # message type 
     type:str = 'markdown'
 
-    def __init__(self, to_username: str, from_username: str, content: str, **kwargs) -> None:
-        super().__init__(to_username, from_username, **kwargs)
+    def __init__(self, to_username: str, from_username: str, agent_id: str, content: str, **kwargs) -> None:
+        super().__init__(to_username, from_username, agent_id, **kwargs)
         # the content in markdown format
         self.content:str = content
 

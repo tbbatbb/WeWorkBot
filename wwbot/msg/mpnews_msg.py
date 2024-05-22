@@ -19,8 +19,8 @@ class MPNewsMessage(Message):
     # message type 
     type:str = 'mpnews'
 
-    def __init__(self, to_username: str, from_username: str, articles:List[MPNews], **kwargs) -> None:
-        super().__init__(to_username, from_username, **kwargs)
+    def __init__(self, to_username: str, from_username: str, agent_id: str, articles:List[MPNews], **kwargs) -> None:
+        super().__init__(to_username, from_username, agent_id, **kwargs)
         # the mpnews list 
         self.articles:List[MPNews] = articles
 
