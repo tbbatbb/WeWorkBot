@@ -30,7 +30,7 @@ def text_handler(msg:TextMessage) -> Message:
     \param msg: an instance of TextMessage because the handler is registered to 'text'
     '''
     # return a simple text message to reply the message 
-    return TextMessage(msg.from_username, msg.to_username, msg.content)
+    return TextMessage(msg.from_username, msg.to_username, msg.agent_id, msg.content)
 
 if __name__ == '__main__':
     app.run(host, port)
