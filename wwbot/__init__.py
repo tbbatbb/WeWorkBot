@@ -262,3 +262,7 @@ def location_default(msg:LocationMessage) -> Message:
 @WWBot.on('link')
 def link_default(msg:LinkMessage) -> Message:
     return TextMessage(msg.from_username, msg.to_username, msg.agent_id, f'{msg.title}\n{msg.description}\n{msg.url}\n{msg.pic_url}')
+
+@WWBot.verify_handler()
+@WWBot.request_handler()
+def useless(): pass 
