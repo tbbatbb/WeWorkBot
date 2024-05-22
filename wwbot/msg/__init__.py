@@ -12,7 +12,7 @@ class Message:
     # message type 
     type:str = 'message'
 
-    def __init__(self, to_username:str, from_username:str, agent_id:str, create_time:int=None, msg_id:int=None) -> None:
+    def __init__(self, to_username:str, from_username:str, agent_id:str, create_time:int=None, msg_id:int=None, safe:bool=False, enable_id_trans:bool=False, enable_duplicate_check:bool=False, duplicate_check_interval:int=1800) -> None:
         # the id of the receiver of the message 
         self.to_username:str = to_username
         # the id of the sender of the message 
@@ -24,6 +24,14 @@ class Message:
         self.create_time:int = create_time or int(time.time())
         # message id 
         self.message_id:int = msg_id or self.create_time * 1000 + random.randint(1000, 9999)
+        # whether the message can be shared when it's sent by send_to 
+        self.safe:bool = safe
+        # whether to enable the id translation
+        self.enable_id_trans:bool = enable_id_trans
+        # whether to check the message duplication 
+        self.enable_duplicate_check:bool = enable_duplicate_check
+        # the interval of message duplication checking, in second
+        self.duplicate_check_interval:int = duplicate_check_interval
     
     @abstractmethod
     def to_xml(self) -> str:

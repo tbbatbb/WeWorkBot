@@ -37,7 +37,7 @@ class MPNewsMessage(Message):
             if n.content_source_url is not None: article["content_source_url"] = n.content_source_url
             if n.desc is not None: article["digest"] = n.desc
             articles.append(article)
-        return json.dumps({"touser":self.to_username,"msgtype":"mpnews","agentid":self.agent_id,"mpnews":{"articles":articles}})
+        return json.dumps({"touser":self.to_username,"msgtype":"mpnews","agentid":self.agent_id,"mpnews":{"articles":articles},"safe":1 if self.safe else 0,"enable_id_trans":1 if self.enable_id_trans else 0,"enable_duplicate_check":1 if self.enable_duplicate_check else 0,"duplicate_check_interval":self.duplicate_check_interval})
     
     @classmethod
     def from_xml(cls, xml_tree: Element):

@@ -22,7 +22,7 @@ class VoiceMessage(Message):
 
     def to_json(self) -> str:
         '''Represent voice message in JSON format'''
-        return json.dumps({"touser":self.to_username,"msgtype":"voice","agentid":self.agent_id,"voice":{"media_id":self.media_id}})
+        return json.dumps({"touser":self.to_username,"msgtype":"voice","agentid":self.agent_id,"voice":{"media_id":self.media_id},"safe":1 if self.safe else 0,"enable_id_trans":1 if self.enable_id_trans else 0,"enable_duplicate_check":1 if self.enable_duplicate_check else 0,"duplicate_check_interval":self.duplicate_check_interval})
     
     @classmethod
     def from_xml(cls, xml_tree: Element):

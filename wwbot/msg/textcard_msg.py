@@ -26,7 +26,7 @@ class TextCardMessage(Message):
 
     def to_json(self) -> str:
         '''Represent textcard message in JSON format'''
-        return json.dumps({"touser":self.to_username,"msgtype":"textcard","agentid":self.agent_id,"textcard":{"title":self.title,"description":self.description,"url":self.url,"btntext":self.btntext}})
+        return json.dumps({"touser":self.to_username,"msgtype":"textcard","agentid":self.agent_id,"textcard":{"title":self.title,"description":self.description,"url":self.url,"btntext":self.btntext},"safe":1 if self.safe else 0,"enable_id_trans":1 if self.enable_id_trans else 0,"enable_duplicate_check":1 if self.enable_duplicate_check else 0,"duplicate_check_interval":self.duplicate_check_interval})
     
     @classmethod
     def from_xml(cls, xml_tree: Element):
