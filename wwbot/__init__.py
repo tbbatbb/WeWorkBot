@@ -158,7 +158,7 @@ class WWBot:
         '''Decorator for url verification callback'''
         def deco(func:Callable):
             @cls.flask_app.route(cls.callback_path, methods=methods)
-            def verify_handler_wrapper(*args, **kwargs):
+            def verify_handler_wrapper():
                 msg_sig:str = request.args.get('msg_signature', default='')
                 ts:str = request.args.get('timestamp', default='')
                 nonce:str = request.args.get('nonce', default='')
@@ -185,7 +185,7 @@ class WWBot:
         '''Decorator for request callback'''
         def deco(func:Callable):
             @cls.flask_app.route(cls.callback_path, methods=methods)
-            def request_handler_wrapper(*args, **kwargs):
+            def request_handler_wrapper():
                 msg_sig:str = request.args.get('msg_signature', default='')
                 ts:str = request.args.get('timestamp', default='')
                 nonce:str = request.args.get('nonce', default='')
