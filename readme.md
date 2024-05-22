@@ -41,7 +41,7 @@ def text_handler(msg:TextMessage) -> Message:
     # 关于接收到的消息格式具体定义，参考 https://developer.work.weixin.qq.com/document/path/90239
     msg_content:str = msg.content
     # 作为示例，直接使用接收到的消息作为回复，相当于一个 echo bot
-    return TextMessage(msg.from_username, msg.to_username, msg_content)
+    return TextMessage(msg.from_username, msg.to_username, msg.agent_id, msg_content)
 
 # WeWorkBot运行在Flask框架之上
 app:Flask = Flask('WWBot')
