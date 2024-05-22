@@ -32,5 +32,5 @@ class TextMessage(Message):
         msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
-        return cls(to_username, from_username, content, agent_id=agent_id, create_time=create_time, msg_id=msg_id)
+        return cls(to_username, from_username, agent_id, content, create_time=create_time, msg_id=msg_id)
 

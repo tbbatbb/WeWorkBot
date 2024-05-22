@@ -35,5 +35,5 @@ class VoiceMessage(Message):
         msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
-        return cls(to_username, from_username, media_id, format=format, agent_id=agent_id, create_time=create_time, msg_id=msg_id)
+        return cls(to_username, from_username, agent_id, media_id, format=format, create_time=create_time, msg_id=msg_id)
 

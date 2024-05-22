@@ -39,5 +39,5 @@ class VideoMessage(Message):
         msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
-        return cls(to_username, from_username, media_id, thumb_id=thumb_id, agent_id=agent_id, create_time=create_time, msg_id=msg_id)
+        return cls(to_username, from_username, agent_id, media_id, thumb_id=thumb_id, create_time=create_time, msg_id=msg_id)
 

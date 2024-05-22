@@ -40,5 +40,5 @@ class LinkMessage(Message):
         msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
-        return cls(to_username, from_username, title, desc, url, pic_url, agent_id=agent_id, create_time=create_time, msg_id=msg_id)
+        return cls(to_username, from_username, agent_id, title, desc, url, pic_url, create_time=create_time, msg_id=msg_id)
 

@@ -40,5 +40,5 @@ class LocationMessage(Message):
         msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
-        return cls(to_username, from_username, loc_x, loc_y, scale, label, agent_id=agent_id, create_time=create_time, msg_id=msg_id)
+        return cls(to_username, from_username, agent_id, loc_x, loc_y, scale, label, create_time=create_time, msg_id=msg_id)
 
