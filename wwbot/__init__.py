@@ -218,15 +218,15 @@ class WWBot:
 
                 cls.logger.info(f'Got a new {msg.__class__.__name__} message, NO. {msg.message_id}')
                 
-                if msg.type not in cls.msg_handler:
-                    cls.logger.warn(f'No message handler registered for messages of "{msg.type}" type')
+                if msg.key not in cls.msg_handler:
+                    cls.logger.warn(f'No message handler registered for messages of "{msg.key}" type')
                     return '', 200
 
                 start_at:float = time.time()
-                resp_msg:Message = cls.msg_handler[msg.type](msg)
+                resp_msg:Message = cls.msg_handler[msg.key](msg)
                 while (time.time() - start_at < 4.8) and resp_msg is None:
                     time.sleep(0.4)
-                    resp_msg = cls.msg_handler[msg.type](msg)
+                    resp_msg = cls.msg_handler[msg.key](msg)
                 if resp_msg is None:
                     cls.__resp_msg_cache[msg.message_id]['nreq'] += 1
                     cls.logger.warn('Failed to reply in time, try next time')
