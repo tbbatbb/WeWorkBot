@@ -18,7 +18,7 @@ class SubscribeEventMessage(EventMessage):
         from_username:str = xml_tree.find('FromUserName').text
         create_time:str = xml_tree.find('CreateTime').text
         event:str = xml_tree.find('Event').text
-        event_key:str = xml_tree.find('EventKey').text
+        event_key:str = '' if xml_tree.find('EventKey') is None else xml_tree.find('EventKey').text
         # msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
