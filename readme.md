@@ -62,7 +62,7 @@ WWBot.config(app, corp_id, corp_secret, token, aes_key, callback_path=callback_p
 if __name__ == '__main__':
     app.run('0.0.0.0', 31221)
 ```
-更加完整的例子请参考`sample.py`。
+更加完整的例子请参考`exampls/echo_bot.py`。
 
 ## TODO List
 
