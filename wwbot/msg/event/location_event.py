@@ -25,7 +25,7 @@ class LocationEventMessage(EventMessage):
         create_time:str = xml_tree.find('CreateTime').text
         event:str = xml_tree.find('Event').text
         event_key:str = xml_tree.find('EventKey').text
-        latitude:str = xml_tree.find('EventKey').text
+        latitude:str = xml_tree.find('Latitude').text
         longitude:str = xml_tree.find('Longitude').text
         precision:str = xml_tree.find('Precision').text
         # msg_id:str = xml_tree.find('MsgId').text
