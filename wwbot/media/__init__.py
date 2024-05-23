@@ -96,3 +96,17 @@ class Media:
         if resp is None: return resp
         resp_json = resp.json()
         return UploadImageResult(resp_json['url'], resp_json['errcode'], resp_json['errmsg'])
+
+    @classmethod
+    def download(cls, access_token:str, media_id:str, save_to:str) -> bool:
+        '''Download an uploaded file with media_id'''
+        url:str = f'https://qyapi.weixin.qq.com/cgi-bin/media/get?access_token={access_token}&media_id={media_id}'
+        try:
+            resp:Response = requests.get(url, stream=True)
+            with open(save_to, 'wb') as outf:
+                for iter in resp.iter_content(chunk_size=1024*32):
+                    outf.write(iter)
+            return True
+        except Exception as e:
+            cls.logger.error(e)
+            return False
