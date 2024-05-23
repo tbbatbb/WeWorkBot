@@ -217,6 +217,10 @@ class WWBot:
                 if msg is None: return '', 200
 
                 cls.logger.info(f'Got a new {msg.__class__.__name__} message, NO. {msg.message_id}')
+                
+                if msg.type not in cls.msg_handler:
+                    cls.logger.warn(f'No message handler registered for messages of "{msg.type}" type')
+                    return '', 200
 
                 start_at:float = time.time()
                 resp_msg:Message = cls.msg_handler[msg.type](msg)
