@@ -5,6 +5,9 @@ from . import EventMessage
 
 class EnterAgentEventMessage(EventMessage):
 
+    # handler key 
+    key:str = 'event.enter_agent'
+
     def __init__(self, to_username: str, from_username: str, agent_id: str, event: str, event_key: str = '', **kwargs) -> None:
         super().__init__(to_username, from_username, agent_id, event, event_key, **kwargs)
 
