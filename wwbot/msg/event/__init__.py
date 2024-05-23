@@ -29,6 +29,7 @@ from .location_event import LocationEventMessage
 from .subscribe_event import SubscribeEventMessage
 from .enter_agent_event import EnterAgentEventMessage
 from .batch_job_result_event import BatchJobResultEventMessage
+from .upload_media_job_finish_event import UploadMediaJobFinishEventMessage
 
 def event_msg_from_xml(xml_tree:Element) -> Message:
     '''Parse message from xml tree'''
@@ -37,4 +38,5 @@ def event_msg_from_xml(xml_tree:Element) -> Message:
     if event == 'enter_agent': return EnterAgentEventMessage.from_xml(xml_tree)
     if event == 'location': return LocationEventMessage.from_xml(xml_tree)
     if event == 'batch_job_result': return BatchJobResultEventMessage(xml_tree)
+    if event == 'upload_media_job_finish': return UploadMediaJobFinishEventMessage(xml_tree)
     Message.logger.warn('Unregistered event type')
