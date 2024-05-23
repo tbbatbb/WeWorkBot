@@ -51,7 +51,7 @@ class Message:
         '''Parse different types of messages from XML object'''
         pass 
 
-
+from .event import event_msg_from_xml
 from .text_msg import TextMessage
 from .link_msg import LinkMessage
 from .file_msg import FileMessage
@@ -67,6 +67,7 @@ from .mpnews_msg import MPNews, MPNewsMessage
 def msg_from_xml(xml_tree:Element) -> Message:
     '''Parse message from xml tree'''
     msg_type:str = xml_tree.find('MsgType').text
+    if msg_type == 'event': return event_msg_from_xml(xml_tree)
     if msg_type == 'text': return TextMessage.from_xml(xml_tree)
     if msg_type == 'image': return ImageMessage.from_xml(xml_tree)
     if msg_type == 'voice': return VoiceMessage.from_xml(xml_tree)
