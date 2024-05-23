@@ -22,6 +22,8 @@ class WWBot:
     logger:Logger = Logger('WWBot')
     # some api urls 
     API_PUSH_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}'
+    # api url for sending chat messages 
+    API_CHATMSG_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/appchat/send?access_token={token}'
     API_TOKEN_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpid}&corpsecret={appsecret}'
 
     __last_token_got_at:int = 0
@@ -116,6 +118,10 @@ class WWBot:
             cls.logger.error('Failed To Get Access Token')
             return False
         url:str = cls.API_PUSH_URL.format(token=access_token)
+        # if the message is for chat 
+        if msg.for_chat:
+            cls.logger.info('Message sent as Chat Message')
+            url = cls.API_CHATMSG_URL.format(token=access_token)
         try:
             resp:Response = requests.post(url, data=msg.to_json(), timeout=20)
             if resp.status_code != 200:
