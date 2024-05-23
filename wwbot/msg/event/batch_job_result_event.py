@@ -27,10 +27,10 @@ class BatchJobResultEventMessage(EventMessage):
         create_time:str = xml_tree.find('CreateTime').text
         event:str = xml_tree.find('Event').text
         event_key:str = '' if xml_tree.find('EventKey') is None else xml_tree.find('EventKey').text
-        job_id:str = xml_tree.find('JobId').text
-        job_type:str = xml_tree.find('JobType').text
-        err_code:str = xml_tree.find('ErrCode').text
-        err_msg:str = xml_tree.find('ErrMsg').text
+        job_id:str = xml_tree.find('BatchJob/JobId').text
+        job_type:str = xml_tree.find('BatchJob/JobType').text
+        err_code:str = xml_tree.find('BatchJob/ErrCode').text
+        err_msg:str = xml_tree.find('BatchJob/ErrMsg').text
         # msg_id:str = xml_tree.find('MsgId').text
         agent_id:str = xml_tree.find('AgentID').text
 
