@@ -8,6 +8,8 @@ class TextCardMessage(Message):
 
     # message type 
     type:str = 'textcard'
+    # handler key 
+    key:str = 'textcard'
 
     def __init__(self, to_username: str, from_username: str, agent_id: str, title: str, desc:str, url:str, btntext:str='', **kwargs) -> None:
         super().__init__(to_username, from_username, agent_id, **kwargs)

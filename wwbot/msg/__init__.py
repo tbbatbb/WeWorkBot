@@ -11,6 +11,8 @@ class Message:
 
     # message type 
     type:str = 'message'
+    # handler key 
+    key:str = 'message'
 
     def __init__(self, to_username:str, from_username:str, agent_id:str, create_time:int=None, msg_id:int=None, safe:bool=False, enable_id_trans:bool=False, enable_duplicate_check:bool=False, duplicate_check_interval:int=1800) -> None:
         # the id of the receiver of the message 

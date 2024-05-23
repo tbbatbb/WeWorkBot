@@ -7,6 +7,8 @@ class LinkMessage(Message):
 
     # message type 
     type:str = 'link'
+    # handler key 
+    key:str = 'link'
 
     def __init__(self, to_username: str, from_username: str, agent_id: str, title:str, desc:str, url:str, pic_url:str, **kwargs) -> None:
         super().__init__(to_username, from_username, agent_id, **kwargs)

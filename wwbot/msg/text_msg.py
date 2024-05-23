@@ -8,6 +8,8 @@ class TextMessage(Message):
 
     # message type 
     type:str = 'text'
+    # handler key 
+    key:str = 'text'
 
     def __init__(self, to_username: str, from_username: str, agent_id: str, content: str, **kwargs) -> None:
         super().__init__(to_username, from_username, agent_id, **kwargs)
