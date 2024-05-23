@@ -24,3 +24,6 @@ msg:VideoMessage = VideoMessage(to_username, corp_id, agent_id, ur.media_id, tit
 
 # send the message 
 WWBot.send_to(corp_id, corp_secret, msg)
+
+# download file 
+Media.download(access_token, ur.media_id, './saved_file')
