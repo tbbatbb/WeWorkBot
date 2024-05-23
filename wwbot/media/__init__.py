@@ -4,7 +4,7 @@ import os, requests, mimetypes
 from ..lib import Logger
 from requests import Response
 from requests_toolbelt import MultipartEncoder
-from typing import Literal, NamedTuple
+from typing import Literal, NamedTuple, Dict, Any
 
 mimetypes.init()
 
@@ -17,6 +17,11 @@ class UploadResult(NamedTuple):
 
 class UploadImageResult(NamedTuple):
     url:str
+    err_code:int
+    err_msg:str 
+
+class UploadByURLResult(NamedTuple):
+    job_id:str
     err_code:int
     err_msg:str 
 
@@ -50,6 +55,16 @@ class Media:
             return None
 
     @classmethod
+    def __post_req(cls, url:str, data:Dict[str, Any]) -> Response:
+        '''Send POST request'''
+        try:
+            resp:Response = requests.post(url, json=data)
+            return resp
+        except Exception as e:
+            cls.logger.error(e)
+            return None
+
+    @classmethod
     def upload(cls, access_token:str, file_type:Literal['image', 'voice', 'video', 'file'], file_path:str) -> UploadResult:
         '''Upload media files synchronously'''
         url:str = f'https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={access_token}&type={file_type}'
@@ -57,6 +72,21 @@ class Media:
         if resp is None: return resp
         resp_json = resp.json()
         return UploadResult(resp_json['type'], resp_json['media_id'], resp_json['created_at'], resp_json['errcode'], resp_json['errmsg'])
+
+    @classmethod
+    def upload_by_url(cls, access_token:str, scene:int, type:Literal['video', 'file'], filename:str, url:str, md5:str) -> UploadByURLResult:
+        '''Upload files by providing url'''
+        req_url:str = f'https://qyapi.weixin.qq.com/cgi-bin/media/upload_by_url?access_token={access_token}'
+        resp:Response = cls.__post_req(req_url, {
+            'scene': scene,
+            'type': type,
+            'filename': filename,
+            'url': url,
+            'md5': md5
+        })
+        if resp is None: return resp
+        resp_json = resp.json()
+        return UploadByURLResult(resp_json['jobid'], resp_json['errcode'], resp_json['errmsg'])
         
     @classmethod
     def uploadimg(cls, access_token:str, file_path:str) -> UploadImageResult:
