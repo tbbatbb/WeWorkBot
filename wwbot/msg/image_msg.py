@@ -2,6 +2,7 @@
 
 import json
 from . import Message
+from typing import Any, Dict
 from xml.etree.ElementTree import Element
 
 class ImageMessage(Message):
@@ -24,7 +25,10 @@ class ImageMessage(Message):
 
     def to_json(self) -> str:
         '''Represent image message in JSON format'''
-        return json.dumps({"touser":self.to_username,"msgtype":"image","agentid":self.agent_id,"image":{"media_id":self.media_id},"safe":1 if self.safe else 0,"enable_id_trans":1 if self.enable_id_trans else 0,"enable_duplicate_check":1 if self.enable_duplicate_check else 0,"duplicate_check_interval":self.duplicate_check_interval})
+        data:Dict[str, Any] = {"msgtype":"image","image":{"media_id":self.media_id},"safe":1 if self.safe else 0,"enable_id_trans":1 if self.enable_id_trans else 0,"enable_duplicate_check":1 if self.enable_duplicate_check else 0,"duplicate_check_interval":self.duplicate_check_interval}
+        if self.for_chat: data.update({"chatid":self.chat_id})
+        else: data.update({"touser":self.to_username,"agentid":self.agent_id})
+        return json.dumps(data)
     
     @classmethod
     def from_xml(cls, xml_tree: Element):
