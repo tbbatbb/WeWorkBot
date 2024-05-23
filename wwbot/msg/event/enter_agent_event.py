@@ -9,7 +9,7 @@ class EnterAgentEventMessage(EventMessage):
     key:str = 'event.enter_agent'
 
     def __init__(self, to_username: str, from_username: str, agent_id: str, event: str, event_key: str = '', **kwargs) -> None:
-        super().__init__(to_username, from_username, agent_id, event, event_key, **kwargs)
+        super().__init__(to_username, from_username, agent_id, event, event_key=event_key, **kwargs)
 
     @classmethod
     def from_xml(cls, xml_tree: Element):

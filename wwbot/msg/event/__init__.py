@@ -25,6 +25,7 @@ class EventMessage(Message):
         '''Represent event message in JSON format'''
         raise NotImplementedError('Unable to send an event message in current WeWork')
 
+from .location_event import LocationEventMessage
 from .subscribe_event import SubscribeEventMessage
 from .enter_agent_event import EnterAgentEventMessage
 
@@ -33,8 +34,5 @@ def event_msg_from_xml(xml_tree:Element) -> Message:
     event:str = xml_tree.find('Event').text.lower()
     if event in ['subscribe', 'unsubscribe']: return SubscribeEventMessage.from_xml(xml_tree)
     if event == 'enter_agent': return EnterAgentEventMessage.from_xml(xml_tree)
-    if event == 'voice': return VoiceMessage.from_xml(xml_tree)
-    if event == 'video': return VideoMessage.from_xml(xml_tree)
-    if event == 'link': return LinkMessage.from_xml(xml_tree)
-    if event == 'location': return LocationMessage.from_xml(xml_tree)
-    Message.logger.warn('Unregistered message type')
+    if event == 'location': return LocationEventMessage.from_xml(xml_tree)
+    Message.logger.warn('Unregistered event type')
