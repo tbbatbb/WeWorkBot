@@ -25,6 +25,18 @@ class UploadByURLResult(NamedTuple):
     err_code:int
     err_msg:str 
 
+class GetUploadByURLDetail(NamedTuple):
+    media_id:str
+    created_at:str
+    err_code:int
+    err_msg:str
+
+class GetUploadByURLResult(NamedTuple):
+    detail:GetUploadByURLDetail
+    status:int
+    err_code:int
+    err_msg:str 
+
 class Media:
     
     logger:Logger = Logger('Media')
@@ -88,6 +100,20 @@ class Media:
         resp_json = resp.json()
         return UploadByURLResult(resp_json['jobid'], resp_json['errcode'], resp_json['errmsg'])
         
+    @classmethod
+    def get_upload_by_url_result(cls, access_token:str, job_id:str) -> GetUploadByURLResult:
+        '''Get the result for the job "upload by url"'''
+        req_url:str = f'https://qyapi.weixin.qq.com/cgi-bin/media/get_upload_by_url_result?access_token={access_token}'
+        resp:Response = cls.__post_req(req_url, {'jobid': job_id})
+        if resp is None: return resp
+        resp_json = resp.json()
+        return GetUploadByURLResult(
+            GetUploadByURLDetail(resp_json['detail']['media_id'], resp_json['detail']['created_at'], resp_json['detail']['errcode'], resp_json['detail']['errmsg']),
+            resp_json['status'],
+            resp_json['errcode'],
+            resp_json['errmsg']
+        )
+
     @classmethod
     def uploadimg(cls, access_token:str, file_path:str) -> UploadImageResult:
         '''Upload image'''
