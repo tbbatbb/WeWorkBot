@@ -40,7 +40,7 @@ class Media:
         try:
             resp:Response = requests.post(url, data=form_data, headers={'Content-Type': form_data.content_type})
             resp_json = resp.json()
-            return UploadResult(resp['type'], resp_json['media_id'], resp_json['created_at'], resp_json['errcode'], resp_json['errmsg'])
+            return UploadResult(resp_json['type'], resp_json['media_id'], resp_json['created_at'], resp_json['errcode'], resp_json['errmsg'])
         except Exception as e:
             cls.logger.error(e)
             return None
