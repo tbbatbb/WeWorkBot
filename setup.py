@@ -7,7 +7,7 @@ Please refer to the homepage of the library
 
 setuptools.setup(
   name="wwbot",
-  version="0.0.10",
+  version="0.0.11a0",
   author="tbbatbb",
   author_email="20682299+tbbatbb@users.noreply.github.com",
   description="A library for dealing with messages in WeWork",
