@@ -31,7 +31,7 @@ class VideoMessage(Message):
         '''Represent video message in JSON format'''
         data:Dict[str, Any] = {"msgtype":"video","video":{"media_id":self.media_id,"title":self.title,"description":self.description},"safe":1 if self.safe else 0,"enable_id_trans":1 if self.enable_id_trans else 0,"enable_duplicate_check":1 if self.enable_duplicate_check else 0,"duplicate_check_interval":self.duplicate_check_interval}
         if self.for_chat: data.update({"chatid":self.chat_id})
-        else: data.update({"touser":self.to_username,"agentid":self.agent_id})
+        elif not self.for_group_bot: data.update({"touser":self.to_username,"agentid":self.agent_id})
         return json.dumps(data)
     
     @classmethod

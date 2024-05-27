@@ -24,6 +24,8 @@ class WWBot:
     API_PUSH_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}'
     # api url for sending chat messages 
     API_CHATMSG_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/appchat/send?access_token={token}'
+    # api url for sending messages as group bots 
+    API_WEBHOOK_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={key}'
     API_TOKEN_URL:str = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpid}&corpsecret={appsecret}'
 
     __last_token_got_at:int = 0
@@ -122,6 +124,10 @@ class WWBot:
         if msg.for_chat:
             cls.logger.info('Message sent as Chat Message')
             url = cls.API_CHATMSG_URL.format(token=access_token)
+        # if the message is tended to be sent as group bot 
+        elif msg.for_group_bot:
+            cls.logger.info('Message sent as Group Bot Message')
+            url = cls.API_WEBHOOK_URL.format(key=msg.group_bot_key)
         try:
             resp:Response = requests.post(url, data=msg.to_json(), timeout=20)
             if resp.status_code != 200:

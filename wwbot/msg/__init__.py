@@ -14,7 +14,7 @@ class Message:
     # handler key 
     key:str = 'message'
 
-    def __init__(self, to_username:str, from_username:str, agent_id:str, create_time:int=None, msg_id:int=None, safe:bool=False, enable_id_trans:bool=False, enable_duplicate_check:bool=False, duplicate_check_interval:int=1800, for_chat:bool=False, chat_id:str=None) -> None:
+    def __init__(self, to_username:str, from_username:str, agent_id:str, create_time:int=None, msg_id:int=None, safe:bool=False, enable_id_trans:bool=False, enable_duplicate_check:bool=False, duplicate_check_interval:int=1800, for_chat:bool=False, chat_id:str=None, for_group_bot:bool=False, group_bot_key:str=None) -> None:
         # the id of the receiver of the message 
         self.to_username:str = to_username
         # the id of the sender of the message 
@@ -38,6 +38,11 @@ class Message:
         self.for_chat:bool = for_chat
         # if the message is prepared for some chat, then it will be sent to the chat with chat_id 
         self.chat_id:str = chat_id
+        # whether the message is sent by a group bot
+        self.for_group_bot:bool = for_group_bot
+        # the key to send messages as group bots
+        # contained in the webhook url of the group bot, like: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=6449f223-4920-2394-3aa39d939ae0
+        self.group_bot_key:str = group_bot_key
     
     @abstractmethod
     def to_xml(self) -> str:
