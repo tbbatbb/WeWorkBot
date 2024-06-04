@@ -29,7 +29,7 @@ from wwbot import WWBot
 from wwbot.msg import Message, TextMessage
 
 # 注册一个文本消息的事件监听
-@WWBot.on('text')
+@WWBot.on(WWBot.TEXT)
 def text_handler(msg:TextMessage) -> Message:
     '''
     msg参数代表接收到的消息被解析后的实例

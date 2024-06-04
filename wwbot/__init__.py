@@ -45,6 +45,14 @@ class WWBot:
     callback_path:str = '/mbot'
     flask_app:Flask = None
 
+    # message types 
+    TEXT:str = 'text'
+    IMAGE:str = 'image'
+    VOICE:str = 'voice'
+    VIDEO:str = 'video'
+    LOCATION:str = 'location'
+    LINK:str = 'link'
+
     @classmethod
     def config(cls, app:Flask, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot'):
         '''Configure the basic arguments for the bot'''
@@ -143,7 +151,7 @@ class WWBot:
             return False
 
     @classmethod
-    def on(cls, msg_type:Literal['text', 'image', 'voice', 'video', 'location', 'link'], must_reply:bool=True) -> Callable[[Callable[[Message], Message]], Callable[[Message], Message]]:
+    def on(cls, msg_type:str, must_reply:bool=True) -> Callable[[Callable[[Message], Message]], Callable[[Message], Message]]:
         '''Decorator for message dealing'''
         def deco(func:Callable[[Message], Message]) -> Callable[[Message], Message]:
             def on_wrapper(msg:Message) -> Message:
@@ -259,26 +267,26 @@ class WWBot:
             return request_handler_wrapper
         return deco
 
-@WWBot.on('text')
+@WWBot.on(WWBot.TEXT)
 def text_default(msg:TextMessage) -> Message:
     return TextMessage(msg.from_username, msg.to_username, msg.agent_id, msg.content)
 
-@WWBot.on('image')
+@WWBot.on(WWBot.IMAGE)
 def image_default(msg:ImageMessage) -> Message:
     return ImageMessage(msg.from_username, msg.to_username, msg.agent_id, msg.media_id)
 
-@WWBot.on('voice')
+@WWBot.on(WWBot.VOICE)
 def voice_defualt(msg:VoiceMessage) -> Message:
     return VoiceMessage(msg.from_username, msg.to_username, msg.agent_id, msg.media_id)
 
-@WWBot.on('video')
+@WWBot.on(WWBot.VIDEO)
 def video_default(msg:VideoMessage) -> Message:
     return VideoMessage(msg.from_username, msg.to_username, msg.agent_id, msg.media_id)
 
-@WWBot.on('location')
+@WWBot.on(WWBot.LOCATION)
 def location_default(msg:LocationMessage) -> Message:
     return TextMessage(msg.from_username, msg.to_username, msg.agent_id, f'{msg.label}:({msg.location_x},{msg.location_y})\nScale:{msg.scale}')
 
-@WWBot.on('link')
+@WWBot.on(WWBot.LINK)
 def link_default(msg:LinkMessage) -> Message:
     return TextMessage(msg.from_username, msg.to_username, msg.agent_id, f'{msg.title}\n{msg.description}\n{msg.url}\n{msg.pic_url}')
