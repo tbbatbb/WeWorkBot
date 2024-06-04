@@ -6,8 +6,8 @@
 - 接收处理文本(`text`)、图片(`image`)、语音(`voice`)、视频(`video`)、位置(`location`)和链接(`link`)等消息类型；
 - 以文本(`text`)、图片(`image`)、语音(`voice`)、视频(`video`)、图文(`news`)等消息类型进行被动回复；
 - 以文本(`text`)、图片(`image`)、语音(`voice`)、视频(`video`)、Markdown(`markdown`)、图文(`mpnews`)、图文(`news`)、文本卡片(`textcard`)、文件(`file`)等消息类型主动发送应用消息；
-- 简单的文件素材管理，包括上传临时文件、上传图片、异步上传文件、下载文件等;
-- 支持发起群聊、更改群聊信息、获取群聊会话、向群聊发送应用消息等功能（具体限制请参考[官方文档](https://developer.work.weixin.qq.com/document/path/90244)）；
+- 文件素材管理，包括上传临时文件、上传图片、异步上传文件、下载文件等;
+- 发起群聊、更改群聊信息、获取群聊会话、向群聊发送应用消息等功能（具体限制请参考[官方文档](https://developer.work.weixin.qq.com/document/path/90244)）；
 
 
 ## 依赖
