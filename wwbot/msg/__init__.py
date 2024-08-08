@@ -25,7 +25,7 @@ class Message:
         # timestamp for the message 
         self.create_time:int = create_time or int(time.time())
         # message id 
-        self.message_id:int = msg_id or self.create_time * 1000 + random.randint(1000, 9999)
+        self.message_id:int = msg_id or (self.create_time * 1000 + random.randint(1000, 9999))
         # whether the message can be shared when it's sent by send_to 
         self.safe:bool = safe
         # whether to enable the id translation
