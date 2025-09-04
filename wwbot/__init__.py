@@ -3,6 +3,7 @@
 import hashlib, base64, time, requests, json, random, string, struct, socket, logging, sys
 import xml.etree.cElementTree as ET
 from .lib import Logger
+from queue import Queue
 from threading import Thread
 from requests import Response
 from Crypto.Cipher import AES
@@ -35,7 +36,9 @@ class WWBot:
     max_retry:int = 3
 
     msg_handler:Dict[str, Callable[[Message], Message]] = {}
-    __resp_msg_cache:Dict[str, Dict[Literal['nreq', 'resp'], Union[int, Message]]] = {}
+    __msg_queue:Queue[Message] = Queue()
+    # the list of messages that have been handled
+    __msg_handled:List[str] = []
 
     # configurations 
     corp_id:str = ''
@@ -52,6 +55,19 @@ class WWBot:
     VIDEO:str = 'video'
     LOCATION:str = 'location'
     LINK:str = 'link'
+
+    @classmethod
+    def msg_responder(cls) -> None:
+        '''A thread function for sending messages in the msg_queue'''
+        cls.logger.info('Message responder thread started')
+        while True:
+            msg:Message = cls.__msg_queue.get()
+            sent:bool = cls.send_to(cls.corp_id, cls.corp_secret, msg)
+            if sent:
+                cls.logger.info(f'Message No. {msg.message_id} sent asynchronously')
+            else:
+                cls.logger.error(f'Failed to send message No. {msg.message_id} asynchronously, try next time')
+                time.sleep(1)
 
     @classmethod
     def config(cls, app:Flask, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot'):
@@ -72,6 +88,11 @@ class WWBot:
         @cls.verify_handler()
         @cls.request_handler()
         def useless(): pass 
+
+        # start the message respnder thread
+        msg_resoonder_thread:Thread = Thread(target=cls.msg_responder, name='cls.msg_responder')
+        msg_resoonder_thread.daemon = True
+        msg_resoonder_thread.start()
 
     @classmethod
     def cal_sig(cls, token:str, timestamp:str, nonce:str, enc_text:str) -> str:
@@ -155,24 +176,7 @@ class WWBot:
         '''Decorator for message dealing'''
         def deco(func:Callable[[Message], Message]) -> Callable[[Message], Message]:
             def on_wrapper(msg:Message) -> Message:
-                if msg.message_id in cls.__resp_msg_cache and cls.__resp_msg_cache[msg.message_id]['resp'] is not None:
-                    resp_msg:Message = cls.__resp_msg_cache[msg.message_id]['resp']
-                    del cls.__resp_msg_cache[msg.message_id]
-                    return resp_msg
-                if msg.message_id in cls.__resp_msg_cache: return None
-
-                def thread_job(msg:Message):
-                    resp_msg:Message = func(msg)
-                    cls.__resp_msg_cache[msg.message_id]['resp'] = resp_msg
-                    if cls.__resp_msg_cache[msg.message_id]['nreq'] >= cls.max_retry:
-                        if must_reply:
-                            cls.logger.info(f'Reply to the message No. {msg.message_id} of {msg.from_username} asynchronously')
-                            cls.send_to(cls.corp_id, cls.corp_secret, resp_msg)
-                        del cls.__resp_msg_cache[msg.message_id]
-
-                cls.__resp_msg_cache[msg.message_id] = {'nreq': 0, 'resp': None}
-                thread:Thread = Thread(target=thread_job, args=(msg,))
-                thread.start()
+                return func(msg)
             cls.msg_handler[msg_type] = on_wrapper
             return on_wrapper
         return deco
@@ -223,7 +227,7 @@ class WWBot:
 
                 sig:str = cls.cal_sig(cls.token, ts, nonce, enc_msg)
                 if msg_sig != sig:
-                    cls.logger.error('Message Signature Dismatched. Sig. Supposed: {sig}, Sig. Actual: {msg_sig}')
+                    cls.logger.error('Message Signature Unmatched. Sig. Supposed: {sig}, Sig. Actual: {msg_sig}')
                     return 'Invalid Message Signature'
                 
                 dec_msg:bytes = cls.aes_decrypt(cls.aes_key, enc_msg)
@@ -234,8 +238,9 @@ class WWBot:
                 # parse message for detail 
                 msg:Message = msg_from_xml(msg_detail_xml)
 
-                if msg is None: return '', 200
+                if msg is None or msg.message_id in cls.__msg_handled: return 'Not a new message', 200
 
+                cls.__msg_handled.append(msg.message_id)
                 cls.logger.info(f'Got a new {msg.__class__.__name__} message, NO. {msg.message_id}')
                 
                 if msg.key not in cls.msg_handler:
@@ -244,14 +249,13 @@ class WWBot:
 
                 start_at:float = time.time()
                 resp_msg:Message = cls.msg_handler[msg.key](msg)
-                while (time.time() - start_at < 4.8) and resp_msg is None:
-                    time.sleep(0.4)
-                    resp_msg = cls.msg_handler[msg.key](msg)
-                if resp_msg is None:
-                    cls.__resp_msg_cache[msg.message_id]['nreq'] += 1
-                    cls.logger.warn('Failed to reply in time, try next time')
-                    time.sleep(0.2)
-                    return '', 403
+                time_cost:float = time.time() - start_at
+                cls.logger.info(f'Message No. {msg.message_id} handled in {time_cost:.3f} seconds')
+                if resp_msg is None: return 'No resonse', 200
+                elif time_cost >= 4.5:
+                    cls.logger.warn(f'Message No. {msg.message_id} handled too slowly, try to reply asynchronously')
+                    cls.__msg_queue.put(resp_msg)
+                    return 'Reply asynchronously', 403
                 cls.logger.info('Reply in time')
 
                 resp_ts:str = str(int(time.time()))
