@@ -172,10 +172,10 @@ class WWBot:
             return False
 
     @classmethod
-    def on(cls, msg_type:str, must_reply:bool=True) -> Callable[[Callable[[Message], Message]], Callable[[Message], Message]]:
+    def on(cls, msg_type:str, must_reply:bool=True) -> Callable[[Callable[[Message], Message | List[Message] | None]], Callable[[Message], Message | List[Message] | None]]:
         '''Decorator for message dealing'''
-        def deco(func:Callable[[Message], Message]) -> Callable[[Message], Message]:
-            def on_wrapper(msg:Message) -> Message:
+        def deco(func:Callable[[Message], Message | List[Message] | None]) -> Callable[[Message], Message | List[Message] | None]:
+            def on_wrapper(msg:Message) -> Message | List[Message] | None:
                 return func(msg)
             cls.msg_handler[msg_type] = on_wrapper
             return on_wrapper
@@ -248,10 +248,16 @@ class WWBot:
                     return '', 200
 
                 start_at:float = time.time()
-                resp_msg:Message = cls.msg_handler[msg.key](msg)
+                resp_msg:Message | List[Message] = cls.msg_handler[msg.key](msg)
                 time_cost:float = time.time() - start_at
+                if isinstance(resp_msg, list) and len(resp_msg) <= 0: resp_msg = None
+                if isinstance(resp_msg, list) and len(resp_msg) == 1: resp_msg = resp_msg[0]
                 cls.logger.info(f'Message No. {msg.message_id} handled in {time_cost:.3f} seconds')
                 if resp_msg is None: return 'No resonse', 200
+                elif isinstance(resp_msg, list):
+                    cls.logger.warn(f'Multiple response messages for message No. {msg.message_id}, try to reply asynchronously')
+                    for m in resp_msg: cls.__msg_queue.put(m)
+                    return 'Reply asynchronously', 403
                 elif time_cost >= 4.5:
                     cls.logger.warn(f'Message No. {msg.message_id} handled too slowly, try to reply asynchronously')
                     cls.__msg_queue.put(resp_msg)
