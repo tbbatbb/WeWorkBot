@@ -70,7 +70,7 @@ class WWBot:
                 time.sleep(1)
 
     @classmethod
-    def config(cls, app:Flask, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot'):
+    def config(cls, app:Flask, corp_id:str, corp_secret:str, token:str, aes_key:bytes, callback_path:str='/mbot', wait_time:float=5):
         '''Configure the basic arguments for the bot'''
         # flask app 
         cls.flask_app = app
@@ -84,6 +84,9 @@ class WWBot:
         cls.aes_key = aes_key
         # the url path for the message callback 
         cls.callback_path = callback_path
+        # the max time that wwbot can wait for a message handler to handle a message 
+        # the response message that returned after this time will be sent asynchronously
+        cls.wait_time = wait_time
 
         @cls.verify_handler()
         @cls.request_handler()
@@ -258,7 +261,7 @@ class WWBot:
                     cls.logger.warn(f'Multiple response messages for message No. {msg.message_id}, try to reply asynchronously')
                     for m in resp_msg: cls.__msg_queue.put(m)
                     return 'Reply asynchronously', 403
-                elif time_cost >= 4.5:
+                elif time_cost >= cls.wait_time:
                     cls.logger.warn(f'Message No. {msg.message_id} handled too slowly, try to reply asynchronously')
                     cls.__msg_queue.put(resp_msg)
                     return 'Reply asynchronously', 403
